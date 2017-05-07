@@ -36,4 +36,10 @@ public class Incident {
 
     public String getStatus() { return this.status; }
 
+    public String getTimestamp() {return this.timestamp; }
+
+    public  String getLocation() {
+        return this.location.getLat() + " " + this.location.getLng();
+    }
+
 }

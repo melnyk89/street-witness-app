@@ -1,42 +1,49 @@
 package com.kynlem.solution.streetwitness.incidents;
 
-import android.os.AsyncTask;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.kynlem.solution.streetwitness.IncidentAdapter;
 import com.kynlem.solution.streetwitness.R;
 import com.kynlem.solution.streetwitness.dao.Incident;
-import com.kynlem.solution.streetwitness.dao.RequestContainer;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
-public class IncidentsActivity extends AppCompatActivity {
+public class IncidentsActivity extends AppCompatActivity implements IncidentsContract.View{
 
-    ListView incidentsList;
-    IncidentAdapter incidentAdapter;
+    private Toolbar toolbar;
+    private ListView incidentsList;
+    private IncidentAdapter incidentAdapter;
+    private IncidentsContract.Presenter presenter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ConnectivityManager connectivityManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         incidentsList = (ListView) findViewById(R.id.incidents_list);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        setSupportActionBar(toolbar);
 
        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -46,12 +53,21 @@ public class IncidentsActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                presenter.loadIncidents();
+            }
+        });
+
+        presenter = new IncidentsPresenter(IncidentsRemoteDataSource.getInstance(), this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        new HttpRequestTask().execute();
+        presenter.loadIncidents();
     }
 
     @Override
@@ -76,30 +92,32 @@ public class IncidentsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, ArrayList<Incident>> {
-        @Override
-        protected ArrayList<Incident> doInBackground(Void... params) {
-            try {
-                final String url = "http://street-witness.herokuapp.com/api/incidents/";
-                RestTemplate restTemplate = new RestTemplate();
-                ResponseEntity<RequestContainer> requestResponse =
-                       restTemplate.exchange(url,
-                                HttpMethod.GET, null, new ParameterizedTypeReference<RequestContainer>() {
-                                });
-                RequestContainer request = requestResponse.getBody();
-
-                return request.getIncidents();
-            } catch (Exception e) {
-                Log.e("IncidentsActivity", e.getMessage(), e);
-            }
-            return null;
+    @Override
+    public void showIncidents(ArrayList<Incident> incidents) {
+        incidentAdapter = new IncidentAdapter(this, incidents);
+        incidentsList.setAdapter(incidentAdapter);
+        Log.i("INFO", "HERE");
+        for (Incident i :incidents){
+            Log.i("here - ", i.toString());
         }
 
-        @Override
-        protected void onPostExecute(ArrayList<Incident> incidents) {
-            Log.i("Executed", String.valueOf(incidents.size()));
-            incidentAdapter = new IncidentAdapter(getApplicationContext(), incidents);
-            incidentsList.setAdapter(incidentAdapter);
+        Toast.makeText(this, "Size - " + incidents.size(), Toast.LENGTH_LONG).show();
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void setPresenter(IncidentsContract.Presenter presenter) {
+        this.presenter =  presenter;
+    }
+
+    @Override
+    public boolean checkInternetConnection() {
+        if (connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().isAvailable()
+                && connectivityManager.getActiveNetworkInfo().isConnected()) {
+            return true;
         }
+        else
+            return false;
     }
 }

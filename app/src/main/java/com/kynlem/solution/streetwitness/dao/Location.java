@@ -12,4 +12,12 @@ public class Location {
 
     @JsonProperty("lng")
     private String lng;
+
+    public String getLat() {
+        return lat;
+    }
+
+    public String getLng(){
+        return lng;
+    }
 }

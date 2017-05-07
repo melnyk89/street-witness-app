@@ -1,5 +1,6 @@
 package com.kynlem.solution.streetwitness;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,20 +18,20 @@ import java.util.ArrayList;
  */
 
 public class IncidentAdapter extends BaseAdapter {
-    Context context;
+    Activity activity;
     LayoutInflater inflater;
     ArrayList<Incident> incidents;
 
-    public IncidentAdapter(Context context, ArrayList<Incident> incidents){
-        this.context = context;
-        this.inflater = (LayoutInflater) context
+    public IncidentAdapter(Activity activity, ArrayList<Incident> incidents){
+        this.activity = activity;
+        this.inflater = (LayoutInflater) activity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.incidents = incidents;
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return incidents.size();
     }
 
     @Override
@@ -49,17 +50,17 @@ public class IncidentAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = inflater.inflate(R.layout.item, parent, false);
+        if (convertView == null) {
+            convertView = inflater.inflate(R.layout.item, parent, false);
         }
 
         Incident incident = getIncident(position);
+        ((TextView) convertView.findViewById(R.id.incidentName)).setText(incident.getTitle());
+        ((TextView) convertView.findViewById(R.id.incidentStatus)).setText(incident.getStatus());
+        ((TextView) convertView.findViewById(R.id.incidentDate)).setText(incident.getTimestamp());
+        ((TextView) convertView.findViewById(R.id.incidentLocation)).setText(incident.getLocation());
+        ((ImageView) convertView.findViewById(R.id.incident_logo)).setImageResource(R.drawable.police);
 
-        ((TextView) view.findViewById(R.id.tvTitle)).setText(incident.getTitle());
-        ((TextView) view.findViewById(R.id.tvStatus)).setText(incident.getStatus());
-        ((TextView) view.findViewById(R.id.tvDescription)).setText(incident.getDescription());
-
-        return view;
+        return convertView;
     }
 }

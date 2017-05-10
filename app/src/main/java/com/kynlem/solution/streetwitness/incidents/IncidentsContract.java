@@ -5,6 +5,7 @@ import com.kynlem.solution.streetwitness.BaseView;
 import com.kynlem.solution.streetwitness.dao.Incident;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by oleh on 04.05.17.
@@ -18,7 +19,5 @@ public interface IncidentsContract {
 
     interface Presenter extends BasePresenter {
         void loadIncidents();
-
-        void addNewIncident();
     }
 }

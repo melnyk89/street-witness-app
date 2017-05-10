@@ -1,7 +1,9 @@
 package com.kynlem.solution.streetwitness.incidents;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,17 +14,25 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.kynlem.solution.streetwitness.IncidentAdapter;
 import com.kynlem.solution.streetwitness.R;
+import com.kynlem.solution.streetwitness.addincident.AddIncidentActivity;
+import com.kynlem.solution.streetwitness.dao.DataSourceInterface;
 import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
+import com.kynlem.solution.streetwitness.dao.Location;
+
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 public class IncidentsActivity extends AppCompatActivity implements IncidentsContract.View{
@@ -45,12 +55,22 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         setSupportActionBar(toolbar);
 
+        final Intent intent = new Intent(this, AddIncidentActivity.class);
+
        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+//                Map<String, Object> map = new LinkedHashMap<>();
+//                Location l = new Location("10", "20");
+//                map.put("title", "Android_2");
+//                map.put("description", "some text");
+//                map.put("location", l);
+//                presenter.addNewIncident(map);
+                startActivity(intent);
             }
         });
 
@@ -96,12 +116,7 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
     public void showIncidents(ArrayList<Incident> incidents) {
         incidentAdapter = new IncidentAdapter(this, incidents);
         incidentsList.setAdapter(incidentAdapter);
-        Log.i("INFO", "HERE");
-        for (Incident i :incidents){
-            Log.i("here - ", i.toString());
-        }
-
-        Toast.makeText(this, "Size - " + incidents.size(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Data was fetched. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
         swipeRefreshLayout.setRefreshing(false);
     }
 

@@ -1,8 +1,7 @@
 package com.kynlem.solution.streetwitness.dao;
 
-import android.support.annotation.NonNull;
-
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by oleh on 05.05.17.
@@ -10,9 +9,11 @@ import java.util.ArrayList;
 
 public interface DataSourceInterface {
 
-    interface DataSourceCallBackInterface{
+    interface DataSourceLoadCallBackInterface {
         void onIncidentsLoaded(ArrayList<Incident> incidents);
     }
 
-    void getIncidents(DataSourceCallBackInterface callback);
+    void getIncidents(DataSourceLoadCallBackInterface loadCallback);
+
+    void saveIncident(Map<String, Object> dataToStore);
 }

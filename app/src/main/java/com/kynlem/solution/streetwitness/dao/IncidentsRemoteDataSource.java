@@ -1,18 +1,18 @@
 package com.kynlem.solution.streetwitness.dao;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.util.Log;
-
-import com.kynlem.solution.streetwitness.IncidentAdapter;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by oleh on 05.05.17.
@@ -32,20 +32,48 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
     }
 
     @Override
-    public void getIncidents(DataSourceCallBackInterface callback) {
-        List<Incident> data = new ArrayList<>();
-        data.add(new Incident());
-        Log.i("HERE", "ldldldlld");
-        Executor executor = new Executor(callback);
+    public void getIncidents(DataSourceLoadCallBackInterface callback) {
+        GetExecutor executor = new GetExecutor(callback);
         executor.execute();
     }
 
-    private class Executor extends AsyncTask<Void, Void, ArrayList<Incident>> {
+    @Override
+    public void saveIncident(Map<String, Object> dataToStore) {
+        PostExecutor executor = new PostExecutor("http://street-witness.herokuapp.com/api/incidents/");
+        executor.execute(dataToStore);
+    }
+
+    private class PostExecutor extends AsyncTask<Map<String, Object>, Void, String> {
+        private String url;
+
+        public PostExecutor(final String url){
+            this.url = url;
+        }
+
+        @Override
+        protected String doInBackground(Map<String, Object>... params) {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
+            HttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
+
+            restTemplate.getMessageConverters().add(formHttpMessageConverter);
+            restTemplate.getMessageConverters().add(stringHttpMessageConverter);
+
+            return restTemplate.postForObject(this.url, params[0], String.class);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.i("ONPOstExecute - ", result);
+        }
+    }
+
+    private class GetExecutor extends AsyncTask<Void, Void, ArrayList<Incident>> {
 
         private ArrayList<Incident> data;
-        private DataSourceCallBackInterface callBackInterface;
+        private DataSourceLoadCallBackInterface callBackInterface;
 
-        public Executor(DataSourceCallBackInterface callBackInterface){
+        public GetExecutor(DataSourceLoadCallBackInterface callBackInterface){
             this.callBackInterface = callBackInterface;
         }
 
@@ -60,8 +88,6 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
                                 });
                 RequestContainer request = requestResponse.getBody();
                 data = request.getIncidents();
-                Log.i("Data size", String.valueOf(data.size()));
-
                 return request.getIncidents();
 
             } catch (Exception e) {
@@ -72,7 +98,6 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
 
         @Override
         protected void onPostExecute(ArrayList<Incident> incidents) {
-            Log.i("Data size in Post", String.valueOf(data.size()));
             callBackInterface.onIncidentsLoaded(data);
         }
     }

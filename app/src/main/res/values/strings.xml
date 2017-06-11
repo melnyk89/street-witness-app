@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Street witness</string>
     <string name="action_settings">Settings</string>
+    <string-array name="incidents_types_array">
+        <item>Car crash</item>
+        <item>Traffic</item>
+        <item>Poland plates</item>
+    </string-array>
 </resources>

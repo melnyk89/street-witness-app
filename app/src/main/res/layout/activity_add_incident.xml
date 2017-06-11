@@ -16,42 +16,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <EditText
+        <Spinner
+            android:id="@+id/spinnerTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/editTitle"
-            android:hint="Title" />
+            android:background="@android:drawable/spinner_background"
+            android:layout_marginBottom="10dp" />
+
 
         <EditText
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
+            android:layout_height="200dp"
             android:id="@+id/editDescription"
-            android:hint="Description" />
+            android:hint="Description"
+            android:inputType="textMultiLine"
+            android:background="@android:drawable/editbox_background_normal" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/editLatitude"
-            android:hint="Lat" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/editLongitude"
-            android:hint="Long" />
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_input_add"
+            app:srcCompat="@android:drawable/ic_menu_save"
             android:id="@+id/btnSaveIncident" />
     </LinearLayout>
 </RelativeLayout>

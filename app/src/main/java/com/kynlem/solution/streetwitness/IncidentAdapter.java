@@ -2,6 +2,7 @@ package com.kynlem.solution.streetwitness;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,7 @@ public class IncidentAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.i("__________HERE", this.inflater.toString());
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.item, parent, false);
         }

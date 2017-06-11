@@ -1,12 +1,17 @@
 package com.kynlem.solution.streetwitness.incidents;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -35,7 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class IncidentsActivity extends AppCompatActivity implements IncidentsContract.View{
+public class IncidentsActivity extends AppCompatActivity implements IncidentsContract.View {
 
     private Toolbar toolbar;
     private ListView incidentsList;
@@ -54,22 +59,15 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         setSupportActionBar(toolbar);
-
+        presenter = new IncidentsPresenter(IncidentsRemoteDataSource.getInstance(), this);
         final Intent intent = new Intent(this, AddIncidentActivity.class);
 
-       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-//                Map<String, Object> map = new LinkedHashMap<>();
-//                Location l = new Location("10", "20");
-//                map.put("title", "Android_2");
-//                map.put("description", "some text");
-//                map.put("location", l);
-//                presenter.addNewIncident(map);
                 startActivity(intent);
             }
         });
@@ -80,8 +78,6 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
                 presenter.loadIncidents();
             }
         });
-
-        presenter = new IncidentsPresenter(IncidentsRemoteDataSource.getInstance(), this);
     }
 
     @Override

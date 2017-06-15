@@ -3,9 +3,11 @@ package com.kynlem.solution.streetwitness.addincident;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
     private Spinner spinnerIncidentType;
     private EditText editIncidentDescription;
     private ImageButton btnSaveNewIncident;
+    private ImageButton btnTakePicture;
     private LocationManager locationManager;
     private android.location.Location currentLocation;
 
@@ -38,6 +41,7 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
         spinnerIncidentType = (Spinner) findViewById(R.id.spinnerTitle);
         editIncidentDescription = (EditText) findViewById(R.id.editDescription);
         btnSaveNewIncident = (ImageButton) findViewById(R.id.btnSaveIncident);
+        btnTakePicture = (ImageButton) findViewById(R.id.btnTakePhoto);
 
         addIncidentPresenter = new AddIncidentPresenter(IncidentsRemoteDataSource.getInstance(), this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -59,6 +63,17 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
                     lng = String.valueOf(currentLocation.getLongitude());
                 }
                 addIncidentPresenter.saveIncident(title, description, new Location(lat, lng));
+            }
+        });
+
+
+        btnTakePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, 1);
+                }
             }
         });
 

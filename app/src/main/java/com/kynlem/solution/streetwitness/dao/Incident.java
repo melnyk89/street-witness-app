@@ -42,4 +42,8 @@ public class Incident {
         return this.location.getLat() + " " + this.location.getLng();
     }
 
+    public Location getLocationObj(){
+        return location;
+    }
+
 }

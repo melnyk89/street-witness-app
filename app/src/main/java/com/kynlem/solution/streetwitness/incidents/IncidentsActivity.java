@@ -24,6 +24,7 @@ import com.kynlem.solution.streetwitness.dao.DataSourceInterface;
 import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 import com.kynlem.solution.streetwitness.dao.Location;
+import com.kynlem.solution.streetwitness.incidents_map.IncidentsMapActivity;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -57,19 +58,10 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
 
         final Intent intent = new Intent(this, AddIncidentActivity.class);
 
-       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-//                Map<String, Object> map = new LinkedHashMap<>();
-//                Location l = new Location("10", "20");
-//                map.put("title", "Android_2");
-//                map.put("description", "some text");
-//                map.put("location", l);
-//                presenter.addNewIncident(map);
                 startActivity(intent);
             }
         });
@@ -103,11 +95,6 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }

@@ -16,27 +16,49 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Spinner
-            android:id="@+id/spinnerTitle"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/spinner_background"
-            android:layout_marginBottom="10dp" />
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/spinnerTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:drawable/spinner_dropdown_background"
+                android:layout_marginBottom="10dp"
+                android:spinnerMode="dialog" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/editDescription"
+                android:hint="Description"
+                android:inputType="textMultiLine"
+                android:background="@android:drawable/editbox_background_normal" />
+        </LinearLayout>
 
 
-        <EditText
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:id="@+id/editDescription"
-            android:hint="Description"
-            android:inputType="textMultiLine"
-            android:background="@android:drawable/editbox_background_normal" />
+            android:layout_height="wrap_content">
 
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@android:drawable/ic_menu_camera"
+                android:id="@+id/btnTakePhoto"
+                android:layout_weight="1" />
 
-        <ImageButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_menu_save"
-            android:id="@+id/btnSaveIncident" />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@android:drawable/ic_menu_save"
+                android:id="@+id/btnSaveIncident"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
     </LinearLayout>
 </RelativeLayout>

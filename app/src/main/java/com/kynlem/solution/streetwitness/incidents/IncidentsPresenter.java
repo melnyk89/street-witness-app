@@ -1,14 +1,12 @@
 package com.kynlem.solution.streetwitness.incidents;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.DataSourceInterface;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 
 /**
@@ -29,10 +27,15 @@ public class IncidentsPresenter implements IncidentsContract.Presenter {
 
     @Override
     public void loadIncidents() {
-        remoteDataSource.getIncidents(new DataSourceInterface.DataSourceLoadCallBackInterface() {
+        remoteDataSource.getIncidents(new DataSourceInterface.DataSourceCallBackInterface() {
             @Override
             public void onIncidentsLoaded(ArrayList<Incident> incidents) {
                 incidentsView.showIncidents(incidents);
+            }
+
+            @Override
+            public String onTokenRequired() {
+                return "";
             }
         });
     }

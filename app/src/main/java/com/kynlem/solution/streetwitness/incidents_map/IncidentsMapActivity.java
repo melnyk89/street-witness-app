@@ -1,12 +1,16 @@
 package com.kynlem.solution.streetwitness.incidents_map;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,30 +25,40 @@ import com.kynlem.solution.streetwitness.addincident.AddIncidentActivity;
 import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 import com.kynlem.solution.streetwitness.incidents.IncidentsActivity;
-import com.kynlem.solution.streetwitness.incidents.IncidentsContract;
-import com.kynlem.solution.streetwitness.incidents.IncidentsPresenter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class IncidentsMapActivity extends AppCompatActivity implements OnMapReadyCallback,
-        IncidentsContract.View{
+        IncidentsMapContract.View{
 
     private GoogleMap mMap;
     private Toolbar toolbar;
-    private IncidentsContract.Presenter presenter;
+    private IncidentsMapContract.Presenter presenter;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incidents_map);
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         toolbar = (Toolbar) findViewById(R.id.map_toolbar);
+        fab = (FloatingActionButton) findViewById(R.id.fab_map_view);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent intent = new Intent(getApplicationContext(), AddIncidentActivity.class);
+                startActivity(intent);
+            }
+        });
+
         setSupportActionBar(toolbar);
-        presenter = new IncidentsPresenter(IncidentsRemoteDataSource.getInstance(), this);
+        presenter = new IncidentsMapPresenter(IncidentsRemoteDataSource.getInstance(), this);
     }
 
 
@@ -64,6 +78,10 @@ public class IncidentsMapActivity extends AppCompatActivity implements OnMapRead
             @Override
             public boolean onMarkerClick(Marker marker) {
                 final Intent addIncidentIntent = new Intent(getApplicationContext(), AddIncidentActivity.class);
+                addIncidentIntent.putExtra("markerLng", marker.getPosition().longitude);
+                addIncidentIntent.putExtra("markerLat", marker.getPosition().latitude);
+                Log.i("+++++++++++ THERE ", String.valueOf(marker.getPosition().longitude));
+
                 startActivity(addIncidentIntent);
                 return false;
             }
@@ -76,7 +94,6 @@ public class IncidentsMapActivity extends AppCompatActivity implements OnMapRead
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_map, menu);
         return true;
     }
@@ -100,18 +117,44 @@ public class IncidentsMapActivity extends AppCompatActivity implements OnMapRead
 
     @Override
     public void showIncidents(ArrayList<Incident> incidents) {
-        Toast.makeText(this, "Data was fetched on map. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
-        for (Incident incident: incidents){
-            com.kynlem.solution.streetwitness.dao.Location location = incident.getLocationObj();
-            LatLng incidentPosition = new LatLng(new Double(location.getLat()), new Double(location.getLng()));
-            System.out.println(incidentPosition);
-            mMap.addMarker(new MarkerOptions().position(incidentPosition).title(incident.getTitle() + ": " +
-                    incident.getDescription()));
+        if (incidents != null) {
+            Toast.makeText(this, "Data was fetched on map. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
+            for (Incident incident : incidents) {
+                com.kynlem.solution.streetwitness.dao.Location location = incident.getLocationObj();
+                LatLng incidentPosition = new LatLng(new Double(location.getLat()), new Double(location.getLng()));
+//                mMap.addMarker(new MarkerOptions().position(incidentPosition).title(incident.getTitle() + ": " +
+//                        incident.getDescription()));
+            }
         }
     }
 
     @Override
-    public void setPresenter(IncidentsContract.Presenter presenter) {
+    public boolean isTimeToUpdate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentDate = dateFormat.format(new Date());
+        SimpleDateFormat simpledateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        Date stringDate = simpledateformat.parse();
+
+        return true;
+    }
+
+    @Override
+    public String getStoredTokenFromPreferences() {
+        SharedPreferences settings = getSharedPreferences("network_params", 0);
+        String token = settings.getString("TOKEN", "");
+        return token;
+    }
+
+    /*@Override
+    public void storeTokenToPreferences(String token) {
+        SharedPreferences settings = getSharedPreferences("network_params", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("TOKEN", token);
+        editor.commit();
+    }*/
+
+    @Override
+    public void setPresenter(IncidentsMapContract.Presenter presenter) {
         this.presenter = presenter;
     }
 

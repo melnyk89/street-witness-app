@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,6 +24,8 @@ import com.kynlem.solution.streetwitness.R;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 import com.kynlem.solution.streetwitness.dao.Location;
 
+import java.text.SimpleDateFormat;
+
 public class AddIncidentActivity extends AppCompatActivity implements AddIncidentContract.View, LocationListener {
 
     private AddIncidentContract.Presenter addIncidentPresenter;
@@ -32,37 +35,56 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
     private ImageButton btnTakePicture;
     private LocationManager locationManager;
     private android.location.Location currentLocation;
+    private double lat;
+    private double lng;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_incident);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        
         spinnerIncidentType = (Spinner) findViewById(R.id.spinnerTitle);
         editIncidentDescription = (EditText) findViewById(R.id.editDescription);
         btnSaveNewIncident = (ImageButton) findViewById(R.id.btnSaveIncident);
         btnTakePicture = (ImageButton) findViewById(R.id.btnTakePhoto);
-
         addIncidentPresenter = new AddIncidentPresenter(IncidentsRemoteDataSource.getInstance(), this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        final double longitudeFromMarker = getIntent().getDoubleExtra("markerLng", 0);
+        final double latitudeFromMarker = getIntent().getDoubleExtra("markerLat", 0);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.incidents_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerIncidentType.setAdapter(adapter);
 
+
         btnSaveNewIncident.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String lat = "0";
-                String lng = "0";
                 String title = spinnerIncidentType.getSelectedItem().toString();
                 String description = String.valueOf(editIncidentDescription.getText());
-                if (currentLocation != null) {
-                    lat = String.valueOf(currentLocation.getLatitude());
-                    lng = String.valueOf(currentLocation.getLongitude());
+
+                if (longitudeFromMarker == 0 &&
+                        latitudeFromMarker == 0) {
+                    if (currentLocation != null) {
+                        lat = currentLocation.getLatitude();
+                        lng = currentLocation.getLongitude();
+                        addIncidentPresenter.saveIncident(title, description,
+                                new Location(String.valueOf(lat), String.valueOf(lng)));
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "GPS data is not ready. Try again", Toast.LENGTH_LONG).show();
+                    }
                 }
-                addIncidentPresenter.saveIncident(title, description, new Location(lat, lng));
+                else {
+                    addIncidentPresenter.saveIncident(title, description,
+                            new Location(String.valueOf(latitudeFromMarker),
+                                    String.valueOf(longitudeFromMarker)));
+                }
             }
         });
 
@@ -77,11 +99,12 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
             }
         });
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        if (longitudeFromMarker == 0 && longitudeFromMarker == 0) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         }
-
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
     }
 
     @Override
@@ -109,12 +132,19 @@ public class AddIncidentActivity extends AppCompatActivity implements AddInciden
     public void onLocationChanged(android.location.Location location) {
         if (location != null) {
             Toast.makeText(this, "location - " +
-                    location.getLatitude() +
-                    ", " +
-                    location.getLongitude(),
+                            location.getLatitude() +
+                            ", " +
+                            location.getLongitude(),
                     Toast.LENGTH_LONG).show();
 
             currentLocation = location;
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            locationManager.removeUpdates(this);
+            locationManager = null;
         }
     }
 

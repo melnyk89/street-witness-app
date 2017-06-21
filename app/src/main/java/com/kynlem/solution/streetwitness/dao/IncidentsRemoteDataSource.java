@@ -4,11 +4,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import java.util.Map;
 public class IncidentsRemoteDataSource implements DataSourceInterface {
 
     private static IncidentsRemoteDataSource INSTANCE = null;
+    private static String token = "";
 
     private IncidentsRemoteDataSource() {}
 
@@ -28,13 +32,15 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
         if(INSTANCE == null){
             INSTANCE = new IncidentsRemoteDataSource();
         }
+
         return INSTANCE;
     }
 
     @Override
-    public void getIncidents(DataSourceLoadCallBackInterface callback) {
-        GetExecutor executor = new GetExecutor(callback);
-        executor.execute();
+    public void getIncidents(DataSourceCallBackInterface callback) {
+        String query = "http://street-witness.herokuapp.com/api/incidents/";
+        GetRequestExecutor getIncidentsQuery = new GetRequestExecutor(callback, query);
+        getIncidentsQuery.execute();
     }
 
     @Override
@@ -68,30 +74,43 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
         }
     }
 
-    private class GetExecutor extends AsyncTask<Void, Void, ArrayList<Incident>> {
-
+    private class GetRequestExecutor extends AsyncTask<Void, Void, ArrayList<Incident>> {
         private ArrayList<Incident> data;
-        private DataSourceLoadCallBackInterface callBackInterface;
+        private String url;
+        private DataSourceCallBackInterface callBackInterface;
 
-        public GetExecutor(DataSourceLoadCallBackInterface callBackInterface){
+        public GetRequestExecutor(final DataSourceCallBackInterface callBackInterface,
+                                  final String url){
             this.callBackInterface = callBackInterface;
+            this.url = url;
         }
 
         @Override
         protected ArrayList<Incident> doInBackground(Void... params) {
             try {
-                final String url = "http://street-witness.herokuapp.com/api/incidents/";
+                token = callBackInterface.onTokenRequired();
                 RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("content-type", "application/json");
+                headers.add("Authorization", "Bearer " + token);
+                //headers.add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE0OTgwMjUzNjgsImV4cCI6MTQ5ODExMTc2OCwic3ViIjoyLCJyb2xlIjoiVXNlciJ9.tuQyolk3uEcVB43FLj-nVfoUR_fY0a1JAJirgfyzw0Y");
+                HttpEntity entity = new HttpEntity(headers);
                 ResponseEntity<RequestContainer> requestResponse =
                         restTemplate.exchange(url,
-                                HttpMethod.GET, null, new ParameterizedTypeReference<RequestContainer>() {
+                                HttpMethod.GET, entity, new ParameterizedTypeReference<RequestContainer>() {
                                 });
                 RequestContainer request = requestResponse.getBody();
                 data = request.getIncidents();
                 return request.getIncidents();
 
-            } catch (Exception e) {
-                Log.e("IncidentsActivity", e.getMessage(), e);
+            } catch (HttpStatusCodeException e) {
+                switch (e.getStatusCode()){
+                    case UNAUTHORIZED:
+                        Log.i("AUTHORIZATION FAILED", e.getStatusCode().toString());
+                        break;
+                    default:
+                        Log.i("FAULT", e.getResponseBodyAsString());
+                }
             }
             return null;
         }

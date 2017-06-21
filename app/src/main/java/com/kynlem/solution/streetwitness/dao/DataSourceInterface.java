@@ -9,11 +9,12 @@ import java.util.Map;
 
 public interface DataSourceInterface {
 
-    interface DataSourceLoadCallBackInterface {
+    interface DataSourceCallBackInterface {
         void onIncidentsLoaded(ArrayList<Incident> incidents);
+        String onTokenRequired();
     }
 
-    void getIncidents(DataSourceLoadCallBackInterface loadCallback);
+    void getIncidents(DataSourceCallBackInterface loadCallback);
 
     void saveIncident(Map<String, Object> dataToStore);
 }

@@ -12,8 +12,8 @@ public class Incident {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("id")
-    private String id;
+    @JsonProperty("url")
+    private String url;
 
     @JsonProperty("location")
     private Location location;
@@ -26,6 +26,9 @@ public class Incident {
 
     @JsonProperty("title")
     private String title;
+
+    @JsonProperty("reporter")
+    private String reporter;
 
 
     public String getTitle(){

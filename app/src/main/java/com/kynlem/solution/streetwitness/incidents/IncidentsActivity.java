@@ -2,6 +2,7 @@ package com.kynlem.solution.streetwitness.incidents;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -106,6 +107,18 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
         incidentsList.setAdapter(incidentAdapter);
         Toast.makeText(this, "Data was fetched. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public boolean isTimeToUpdate() {
+        return true;
+    }
+
+    @Override
+    public String getStoredTokenFromPreferences() {
+        SharedPreferences settings = getSharedPreferences("network_params", 0);
+        String token = settings.getString("TOKEN", "");
+        return token;
     }
 
     @Override

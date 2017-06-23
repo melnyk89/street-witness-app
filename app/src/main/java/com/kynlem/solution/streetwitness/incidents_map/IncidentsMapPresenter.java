@@ -39,6 +39,7 @@ public class IncidentsMapPresenter implements IncidentsMapContract.Presenter {
                 public String onTokenRequired() {
                     return incidentsMapView.getStoredTokenFromPreferences();
                 }
+
             });
         }
     }

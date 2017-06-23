@@ -25,6 +25,7 @@ import com.kynlem.solution.streetwitness.addincident.AddIncidentActivity;
 import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 import com.kynlem.solution.streetwitness.incidents.IncidentsActivity;
+import com.kynlem.solution.streetwitness.login.LoginActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,6 +60,10 @@ public class IncidentsMapActivity extends AppCompatActivity implements OnMapRead
 
         setSupportActionBar(toolbar);
         presenter = new IncidentsMapPresenter(IncidentsRemoteDataSource.getInstance(), this);
+
+//        final Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
+//        startActivity(loginIntent);
+
     }
 
 
@@ -144,14 +149,6 @@ public class IncidentsMapActivity extends AppCompatActivity implements OnMapRead
         String token = settings.getString("TOKEN", "");
         return token;
     }
-
-    /*@Override
-    public void storeTokenToPreferences(String token) {
-        SharedPreferences settings = getSharedPreferences("network_params", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("TOKEN", token);
-        editor.commit();
-    }*/
 
     @Override
     public void setPresenter(IncidentsMapContract.Presenter presenter) {

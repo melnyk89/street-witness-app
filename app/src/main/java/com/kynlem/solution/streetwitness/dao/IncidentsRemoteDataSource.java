@@ -3,14 +3,19 @@ package com.kynlem.solution.streetwitness.dao;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -48,6 +53,74 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
         PostExecutor executor = new PostExecutor("http://street-witness.herokuapp.com/api/incidents/");
         executor.execute(dataToStore);
     }
+
+    @Override
+    public void loginUser(String user, String password, LoginCallBackInterface loginCallback) {
+        PostLoginExecutor executor = new PostLoginExecutor("http://street-witness.herokuapp.com/api/login",
+                user,password, loginCallback);
+        executor.execute();
+    }
+
+
+    private class PostLoginExecutor extends AsyncTask<Map<String, String>, Void, String> {
+        private String url;
+        private String userName;
+        private String password;
+        private LoginCallBackInterface callback;
+
+        public PostLoginExecutor(final String url, final String userName, final  String password, final LoginCallBackInterface callback){
+            this.url = url;
+            this.userName = userName;
+            this.password = password;
+            this.callback = callback;
+        }
+
+        @Override
+        protected String doInBackground(Map<String, String>... params) {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders requestHeaders = new HttpHeaders();
+            requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+            JSONObject body = new JSONObject();
+            try {
+                body.put("username", userName);
+                body.put("password", password);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            HttpEntity httpEntity = new HttpEntity(body.toString(), requestHeaders);
+
+            try{
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+                return  response.getBody();
+            } catch (HttpStatusCodeException e) {
+                switch (e.getStatusCode()){
+                    case NOT_FOUND:
+                        Log.i("NOT FOUND", e.getStatusCode().toString());
+                        break;
+                    default:
+                        Log.i("FAULT", e.getResponseBodyAsString());
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result == null) {
+                callback.onWrongUserNameOrPassword();
+            }
+            else{
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    callback.onLogin(jsonObject.get("auth_token").toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
     private class PostExecutor extends AsyncTask<Map<String, Object>, Void, String> {
         private String url;
@@ -93,7 +166,6 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("content-type", "application/json");
                 headers.add("Authorization", "Bearer " + token);
-                //headers.add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE0OTgwMjUzNjgsImV4cCI6MTQ5ODExMTc2OCwic3ViIjoyLCJyb2xlIjoiVXNlciJ9.tuQyolk3uEcVB43FLj-nVfoUR_fY0a1JAJirgfyzw0Y");
                 HttpEntity entity = new HttpEntity(headers);
                 ResponseEntity<RequestContainer> requestResponse =
                         restTemplate.exchange(url,
@@ -117,7 +189,7 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
 
         @Override
         protected void onPostExecute(ArrayList<Incident> incidents) {
-            callBackInterface.onIncidentsLoaded(data);
+            callBackInterface.onIncidentsLoaded(incidents);
         }
     }
 }

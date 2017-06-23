@@ -35,8 +35,9 @@ public class IncidentsPresenter implements IncidentsContract.Presenter {
 
             @Override
             public String onTokenRequired() {
-                return "";
+                return incidentsView.getStoredTokenFromPreferences();
             }
+
         });
     }
 

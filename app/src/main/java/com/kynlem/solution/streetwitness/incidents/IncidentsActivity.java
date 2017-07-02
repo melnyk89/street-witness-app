@@ -26,6 +26,7 @@ import com.kynlem.solution.streetwitness.dao.Incident;
 import com.kynlem.solution.streetwitness.dao.IncidentsRemoteDataSource;
 import com.kynlem.solution.streetwitness.dao.Location;
 import com.kynlem.solution.streetwitness.incidents_map.IncidentsMapActivity;
+import com.kynlem.solution.streetwitness.login.LoginActivity;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -103,10 +104,12 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
 
     @Override
     public void showIncidents(ArrayList<Incident> incidents) {
-        incidentAdapter = new IncidentAdapter(this, incidents);
-        incidentsList.setAdapter(incidentAdapter);
-        Toast.makeText(this, "Data was fetched. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
-        swipeRefreshLayout.setRefreshing(false);
+        if (incidents != null) {
+            incidentAdapter = new IncidentAdapter(this, incidents);
+            incidentsList.setAdapter(incidentAdapter);
+            Toast.makeText(this, "Data was fetched. Size - " + incidents.size(), Toast.LENGTH_LONG).show();
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
@@ -119,6 +122,12 @@ public class IncidentsActivity extends AppCompatActivity implements IncidentsCon
         SharedPreferences settings = getSharedPreferences("network_params", 0);
         String token = settings.getString("TOKEN", "");
         return token;
+    }
+
+    @Override
+    public void showLoginScreen() {
+        final Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(loginIntent);
     }
 
     @Override

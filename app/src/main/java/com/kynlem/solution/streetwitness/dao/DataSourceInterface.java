@@ -11,6 +11,7 @@ public interface DataSourceInterface {
 
     interface DataSourceCallBackInterface {
         void onIncidentsLoaded(ArrayList<Incident> incidents);
+        void onLoginRequired();
         String onTokenRequired();
     }
 

@@ -34,6 +34,11 @@ public class IncidentsPresenter implements IncidentsContract.Presenter {
             }
 
             @Override
+            public void onLoginRequired() {
+                incidentsView.showLoginScreen();
+            }
+
+            @Override
             public String onTokenRequired() {
                 return incidentsView.getStoredTokenFromPreferences();
             }

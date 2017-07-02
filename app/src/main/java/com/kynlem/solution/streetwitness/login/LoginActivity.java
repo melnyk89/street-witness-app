@@ -34,9 +34,6 @@ public class LoginActivity extends AppCompatActivity implements LoginContract.Vi
         editUserPassword = (EditText) findViewById(R.id.editUserPassword);
         loginPresenter = new LoginPresenter(IncidentsRemoteDataSource.getInstance(), this);
 
-        Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        //startActivityForResult(i, 1);
-
         btnLoginUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,24 +41,6 @@ public class LoginActivity extends AppCompatActivity implements LoginContract.Vi
                         editUserPassword.getText().toString());
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null){
-            Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
-            Cursor cursor = getContentResolver().query(selectedImage,
-                    filePathColumn, null, null, null);
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            Log.i("Picture=====", picturePath);
-            cursor.close();
-        }
     }
 
     @Override

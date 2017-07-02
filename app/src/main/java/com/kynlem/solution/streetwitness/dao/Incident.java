@@ -2,6 +2,8 @@ package com.kynlem.solution.streetwitness.dao;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * Created by oleh on 25.04.17.
  */
@@ -29,6 +31,9 @@ public class Incident {
 
     @JsonProperty("reporter")
     private String reporter;
+
+    @JsonProperty("files")
+    private String[] files;
 
 
     public String getTitle(){

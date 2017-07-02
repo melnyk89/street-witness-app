@@ -14,6 +14,7 @@ public interface IncidentsMapContract {
 
     interface View extends BaseView<Presenter> {
         void showIncidents(ArrayList<Incident> incidents);
+        void showLoginWindow();
         boolean isTimeToUpdate();
         String getStoredTokenFromPreferences();
     }

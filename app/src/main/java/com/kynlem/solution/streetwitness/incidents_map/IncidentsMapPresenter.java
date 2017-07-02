@@ -36,6 +36,11 @@ public class IncidentsMapPresenter implements IncidentsMapContract.Presenter {
                 }
 
                 @Override
+                public void onLoginRequired() {
+                    incidentsMapView.showLoginWindow();
+                }
+
+                @Override
                 public String onTokenRequired() {
                     return incidentsMapView.getStoredTokenFromPreferences();
                 }

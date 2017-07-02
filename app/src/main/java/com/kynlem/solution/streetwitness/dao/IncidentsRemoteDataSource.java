@@ -50,13 +50,14 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
 
     @Override
     public void saveIncident(Map<String, Object> dataToStore) {
+        Log.i("Store ===== ", dataToStore.toString());
         PostExecutor executor = new PostExecutor("http://street-witness.herokuapp.com/api/incidents/");
         executor.execute(dataToStore);
     }
 
     @Override
     public void loginUser(String user, String password, LoginCallBackInterface loginCallback) {
-        PostLoginExecutor executor = new PostLoginExecutor("http://street-witness.herokuapp.com/api/login",
+        PostLoginExecutor executor = new PostLoginExecutor("http://street-witness.herokuapp.com/auth/login",
                 user,password, loginCallback);
         executor.execute();
     }
@@ -131,6 +132,7 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
 
         @Override
         protected String doInBackground(Map<String, Object>... params) {
+
             RestTemplate restTemplate = new RestTemplate();
             HttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
             HttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
@@ -164,7 +166,7 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
                 token = callBackInterface.onTokenRequired();
                 RestTemplate restTemplate = new RestTemplate();
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("content-type", "application/json");
+                headers.setContentType(MediaType.APPLICATION_JSON);
                 headers.add("Authorization", "Bearer " + token);
                 HttpEntity entity = new HttpEntity(headers);
                 ResponseEntity<RequestContainer> requestResponse =
@@ -189,7 +191,12 @@ public class IncidentsRemoteDataSource implements DataSourceInterface {
 
         @Override
         protected void onPostExecute(ArrayList<Incident> incidents) {
-            callBackInterface.onIncidentsLoaded(incidents);
+            if (incidents == null){
+                callBackInterface.onLoginRequired();
+            }
+            else {
+                callBackInterface.onIncidentsLoaded(incidents);
+            }
         }
     }
 }
